@@ -59,6 +59,9 @@ _RESET_ADDR             	= _ebase_address;
 //_DBG_CODE_ADDR 			= ORIGIN(debug_exec_mem);
 _RAM_SKIP_SIZE				= 0x600;
 
+_key						= ORIGIN(kseg0_boot_mem) + 0x2000;
+_endkey						= _key + 256;
+
 SECTIONS
 {
   .config_BFC00BF0 : {

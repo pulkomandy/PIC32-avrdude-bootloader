@@ -40,6 +40,8 @@
 #define PUT_CONFIG_BITS_HERE
 #include "main.h"
 
+#include "arcfour.h"
+
 // the stk500v2 state machine states
 // see: http://www.atmel.com/dyn/resources/prod_documents/doc2591.pdf
 enum {
@@ -114,6 +116,8 @@ static uint32 addrBase = FLASH_START;
 static uint32 avrdudeAddrBase = FLASH_START;
 static uint32 cbSkipRam = ((uint32) &_RAM_SKIP_SIZE);  
 
+static uint8_t gRC4State[256];
+
 int main()  // we're called directly by Crt0.S
 {
     ASSERT(sizeof(byte) == 1);
@@ -159,6 +163,10 @@ int main()  // we're called directly by Crt0.S
 	
     tLoopStart = _CP0_GET_COUNT();
     tLastBlink = tLoopStart;
+
+	// Init decryption code
+	arcfour_key_setup(gRC4State, key, endkey - key);
+	arcfour_generate_keystream(gRC4State, request, 256);
 
     // at this point we know that we either are going to wait
     // for something to be download, or are going to wait indefinitly for
@@ -439,6 +447,12 @@ avrbl_message(byte *request, int size)
 
             // erase the pages we are about to write to if needed.
             justInTimeFlashErase(load_address, load_address + nbytesAligned)
+
+			// Decrypt the words
+			uint8_t out[nbytes];
+			arcfour_generate_keystream(gRC4State, out, nbytes);
+			for(int i = 0; i < nbytes; i++)
+				request[10+i] ^= out[i];
 
             // program the words
             ASSERT((load_address & 3) == 0);    // this will assert if we got off DWORD alignment

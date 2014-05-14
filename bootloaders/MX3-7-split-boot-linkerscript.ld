@@ -61,6 +61,9 @@ _RAM_SKIP_SIZE				= 0x600;
 /*_BEV_EXCPT_ADDR          = 0xBFC00FB0; */
 /*_GEN_EXCPT_ADDR          = 0xBFC00FC0; */
 
+_key						= ORIGIN(kseg0_boot_mem) + 0x2000;
+_endkey						= _key + 256;
+
 SECTIONS
 {
   .config_BFC02FF0 : {

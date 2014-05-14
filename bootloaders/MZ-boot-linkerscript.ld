@@ -180,6 +180,9 @@ _RAM_SKIP_SIZE				= 0x600;
 /* _SIMPLE_TLB_REFILL_EXCPT_ADDR = (_ebase_address + 0x0); */
 /* end of not used */
 
+_key						= ORIGIN(kseg0_boot_mem) + 0x2000;
+_endkey						= _key + 256;
+
 SECTIONS
 {
     .config_BFC0FF40 : {

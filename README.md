@@ -1,3 +1,21 @@
+PIC32 bootloader with RC4 encryption
+====================================
+
+This is a modified version of the ChipKIT bootloader that allows bootloading a
+PIC32 with an encrypted hex file (see http://github.com/pulkomandy/hexcrypt).
+
+The firmware is encrypted using RC4, and the key is stored in the (read-locked)
+flash of the PIC. This prevents the following:
+ * Programming of a custom firmware through the bootloader
+ * Reading the programmed firmware (and encryption key)
+
+It does NOT prevent:
+ * Reprogramming the chip with a custom firmware using an external ISP programmer.
+
+With a firmware encrypted by hexcrypt, this should work with a standard version
+of avrdude on the computer side. No custom tools needed, making the firmware
+update a painless and easy process for customers.
+
 PIC32-avrdude-bootloader
 ========================
 

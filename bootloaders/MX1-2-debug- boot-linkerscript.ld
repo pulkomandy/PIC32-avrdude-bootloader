@@ -57,6 +57,9 @@ MEMORY
   configsfrs                 : ORIGIN = 0xBFC00BF0, LENGTH = 0x10
 }
 
+_key						= ORIGIN(kseg0_boot_mem) + 0x2000;
+_endkey						= _key + 256;
+
 SECTIONS
 {
   .config_BFC00BF0 : {
