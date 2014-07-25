@@ -40,6 +40,8 @@
 #define PUT_CONFIG_BITS_HERE
 #include "main.h"
 
+#include <stdint.h>
+
 #include "arcfour.h"
 
 // the stk500v2 state machine states

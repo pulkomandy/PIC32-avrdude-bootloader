@@ -8,6 +8,8 @@
                * http://en.wikipedia.org/wiki/RC4
 *********************************************************************/
 
+#include <stdint.h>
+
 /*********************** FUNCTION DEFINITIONS ***********************/
 void arcfour_key_setup(uint8_t state[], const uint8_t key[], int len)
 {
