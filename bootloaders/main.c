@@ -404,7 +404,7 @@ avrbl_message(byte *request, int size)
 			load_address += avrdudeAddrBase;	// lets get our virtual address
             break;
         case CMD_PROGRAM_FLASH_ISP:
-
+		{
             // start of our buffer needs to be DWORD aligned
             ASSERT(((uintptr)(request+10)&3)==0);
 
@@ -461,7 +461,7 @@ avrbl_message(byte *request, int size)
             flashWriteUint32(load_address, (uint32 *)(request+10), nbytesAligned/4);
             load_address += nbytes;             // we tell the truth even if we are not DWORD aligned
             break;                              // this will cause an assert if we do not get a new load address the next time
-
+		}
         case CMD_READ_FLASH_ISP:
 
             endAddr = load_address + ((request[1])<<8)|(request[2]);
