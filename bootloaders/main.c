@@ -315,6 +315,7 @@ avrbl_message(byte *request, int size)
     static uint32 load_address;  // load address for stk500v2 flash read/write operations
     static byte parameters[256];  // track stk500v2 parameters (we ignore them all)
 	static bool fGetBaseAddress = true;
+	static bool keystream_reset = true;
 
     uint32 i;
     uint32 nbytes;
@@ -405,6 +406,7 @@ avrbl_message(byte *request, int size)
             break;
         case CMD_PROGRAM_FLASH_ISP:
 		{
+			keystream_reset = true;
             // start of our buffer needs to be DWORD aligned
             ASSERT(((uintptr)(request+10)&3)==0);
 
@@ -463,8 +465,19 @@ avrbl_message(byte *request, int size)
             break;                              // this will cause an assert if we do not get a new load address the next time
 		}
         case CMD_READ_FLASH_ISP:
+		{
+			if (keystream_reset) {
+				// We must reset the keystream so the read uses the same key as
+				// the write. This way avrdude can "verify" the flash matches
+				// what it expects.
+				arcfour_key_setup(gRC4State, key, endkey - key);
+				arcfour_generate_keystream(gRC4State, request, 256);
+				keystream_reset = false;
+			}
 
             endAddr = load_address + ((request[1])<<8)|(request[2]);
+			int start = replyi;
+			int size = endAddr - load_address;
 
 			// do this page by page as we might have to lie to avrdude.
 			while(load_address < endAddr)
@@ -485,9 +498,17 @@ avrbl_message(byte *request, int size)
 					load_address++;
 				}
 			}
+
+			// Reencrypt the words (you don't want the flash read to come back
+			// as plaintext, do you?)
+			uint8_t out[size];
+			arcfour_generate_keystream(gRC4State, out, size);
+			for(int i = 0; i < size; i++)
+				request[start+i] ^= out[i];
  
             reply[replyi++] = STATUS_CMD_OK;
             break;
+		}
         case CMD_LEAVE_PROGMODE_ISP:
             finshFlashProcessingAfterLoad();
             fLoaded = true;
